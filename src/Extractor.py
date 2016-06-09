@@ -5,7 +5,7 @@ from html.parser import HTMLParser
 
 class Parser(HTMLParser):
     def handle_starttag(self, tag, attrs):
-        global isp, ish, isa
+        global isp, ish, isa, isul, isol, countli
 
         if str(tag) == "p":
             isp = True
@@ -13,9 +13,17 @@ class Parser(HTMLParser):
             ish = True
         elif str(tag) == "a":
             isa = True
+        elif str(tag) == "ul":
+            isul = True
+            countli = 0
+        elif str(tag) == "ol":
+            isol = True
+            countli = 0
+        elif str(tag) == "li":
+            countli += 1
 
     def handle_endtag(self, tag):
-        global isp, ish, isa
+        global isp, ish, isa, isul, isol, countli
 
         if str(tag) == "p":
             isp = False
@@ -30,20 +38,32 @@ class Parser(HTMLParser):
                 print()
                 print()
             isa = False
+        elif str(tag) == "ul":
+            isul = False
+            print()
+        elif str(tag) == "ol":
+            isol = False
+            print()
 
     def handle_data(self, data):
-        global isp, ish, isa
+        global isp, ish, isa, isul, isol, countli
 
         if not data.isspace():
             if isp == True or ish == True:
                 print(data, end="")
             elif isp == False and ish == False and isa == True:
                 print(data, end="")
+            elif isul == True or isol == True:
+                print(countli, " ", data)
 
 
 isp = False
 ish = False
 isa = False
+isol = False
+isul = False
+countli = 0
+
 link = "http://computemagazine.com/man-who-invented-world-wide-web-gives-new-definition/" #url goes here
 
 req = urllib.request.Request(link, headers={'User-Agent': 'Mozilla/5.0'})
