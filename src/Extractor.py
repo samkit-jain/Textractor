@@ -1,4 +1,5 @@
 import urllib.request
+import os
 
 from html.parser import HTMLParser
 
@@ -9,7 +10,8 @@ class Parser(HTMLParser):
 
         if str(tag) == "p":
             isp = True
-        elif str(tag) == "h1" or str(tag) == "h2" or str(tag) == "h3" or str(tag) == "h4" or str(tag) == "h5" or str(tag) == "h6":
+        elif str(tag) == "h1" or str(tag) == "h2" or str(tag) == "h3" or str(tag) == "h4" or str(tag) == "h5" or str(
+                tag) == "h6":
             ish = True
         elif str(tag) == "a":
             isa = True
@@ -29,7 +31,8 @@ class Parser(HTMLParser):
             isp = False
             print()
             print()
-        elif str(tag) == "h1" or str(tag) == "h2" or str(tag) == "h3" or str(tag) == "h4" or str(tag) == "h5" or str(tag) == "h6":
+        elif str(tag) == "h1" or str(tag) == "h2" or str(tag) == "h3" or str(tag) == "h4" or str(tag) == "h5" or str(
+                tag) == "h6":
             ish = False
             print()
             print()
@@ -57,6 +60,44 @@ class Parser(HTMLParser):
                 print(countli, " ", data)
 
 
+def show_menu():
+    print("I want to ")
+    print("1. input URL of the webpage")
+    print("2. input location (local) of an HTML file")
+    print("3. use default URL - http://computemagazine.com/man-who-invented-world-wide-web-gives-new-definition/\n")
+
+
+def clear_screen():
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')
+
+
+def user_input(url):
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    op = urllib.request.urlopen(req)
+    source_code = op.read()
+
+    parser = Parser()
+    parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+
+
+def default():
+    url = "http://computemagazine.com/man-who-invented-world-wide-web-gives-new-definition/"
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    op = urllib.request.urlopen(req)
+    source_code = op.read()
+
+    parser = Parser()
+    parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+
+
+def from_file(location):
+    parser = Parser()
+    # parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+
+
 isp = False
 ish = False
 isa = False
@@ -64,11 +105,23 @@ isol = False
 isul = False
 countli = 0
 
-link = "http://computemagazine.com/man-who-invented-world-wide-web-gives-new-definition/" #url goes here
+clear_screen()
+show_menu()
+choice = int(input("Enter choice (1, 2, 3) - "))
 
-req = urllib.request.Request(link, headers={'User-Agent': 'Mozilla/5.0'})
-op = urllib.request.urlopen(req)
-source_code = op.read()
+while choice not in {1, 2, 3}:
+    clear_screen()
+    print("Option not available! Please try again :)\n")
+    show_menu()
+    choice = int(input("Enter choice (1, 2, 3) - "))
 
-parser = Parser()
-parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+clear_screen()
+
+if choice == 1:
+    link = input("Input URL - ")
+    user_input(link)
+elif choice == 2:
+    loc = input("Input file location - ")
+    from_file(loc)
+elif choice == 3:
+    default()
