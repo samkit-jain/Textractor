@@ -82,21 +82,27 @@ def user_input(url):
     clear_screen()
 
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    op = urllib.request.urlopen(req)
-    source_code = op.read()
+    try:
+        op = urllib.request.urlopen(req, timeout=1)
+        source_code = op.read()
 
-    parser = Parser()
-    parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+        parser = Parser()
+        parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+    except urllib.error.URLError:
+        show_error()
 
 
 def default():
     url = "http://computemagazine.com/man-who-invented-world-wide-web-gives-new-definition/"
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    op = urllib.request.urlopen(req)
-    source_code = op.read()
+    try:
+        op = urllib.request.urlopen(req, timeout=1)
+        source_code = op.read()
 
-    parser = Parser()
-    parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+        parser = Parser()
+        parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+    except urllib.error.URLError:
+        show_error()
 
 
 def from_file(location):
