@@ -67,6 +67,10 @@ def show_menu():
     print("3. use default URL - http://computemagazine.com/man-who-invented-world-wide-web-gives-new-definition/\n")
 
 
+def show_error():
+    print("You may not have a working internet connection :(")
+
+
 def clear_screen():
     if os.name == 'nt':
         os.system('cls')
@@ -75,6 +79,8 @@ def clear_screen():
 
 
 def user_input(url):
+    clear_screen()
+
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     op = urllib.request.urlopen(req)
     source_code = op.read()
@@ -94,8 +100,15 @@ def default():
 
 
 def from_file(location):
-    parser = Parser()
-    # parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
+    clear_screen()
+
+    if location[-5:] != '.html':
+        print("Extension of the file should be .html   -_-")
+    else:
+        file = open(location, 'r')
+        source_code = file.read()
+        parser = Parser()
+        parser.feed(source_code.replace('\n', ' '))
 
 
 isp = False
