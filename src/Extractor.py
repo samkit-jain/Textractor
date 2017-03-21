@@ -1,63 +1,34 @@
-import urllib.request
+import pdfkit
 import os
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfpage import PDFPage
+from cStringIO import StringIO
 
-from html.parser import HTMLParser
 
+def convert_pdf_to_txt(path):
+    rsrcmgr = PDFResourceManager()
+    retstr = StringIO()
+    codec = 'utf-8'
+    laparams = LAParams()
+    device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
+    fp = file(path, 'rb')
+    interpreter = PDFPageInterpreter(rsrcmgr, device)
+    password = ""
+    maxpages = 0
+    caching = True
+    pagenos=set()
 
-class Parser(HTMLParser):
-    def handle_starttag(self, tag, attrs):
-        global isp, ish, isa, isul, isol, countli
+    for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages, password=password,caching=caching, check_extractable=True):
+        interpreter.process_page(page)
 
-        if str(tag) == "p":
-            isp = True
-        elif str(tag) == "h1" or str(tag) == "h2" or str(tag) == "h3" or str(tag) == "h4" or str(tag) == "h5" or str(
-                tag) == "h6":
-            ish = True
-        elif str(tag) == "a":
-            isa = True
-        elif str(tag) == "ul":
-            isul = True
-            countli = 0
-        elif str(tag) == "ol":
-            isol = True
-            countli = 0
-        elif str(tag) == "li":
-            countli += 1
+    text = retstr.getvalue()
 
-    def handle_endtag(self, tag):
-        global isp, ish, isa, isul, isol, countli
-
-        if str(tag) == "p":
-            isp = False
-            print()
-            print()
-        elif str(tag) == "h1" or str(tag) == "h2" or str(tag) == "h3" or str(tag) == "h4" or str(tag) == "h5" or str(
-                tag) == "h6":
-            ish = False
-            print()
-            print()
-        elif str(tag) == "a":
-            if isp == False and ish == False:
-                print()
-                print()
-            isa = False
-        elif str(tag) == "ul":
-            isul = False
-            print()
-        elif str(tag) == "ol":
-            isol = False
-            print()
-
-    def handle_data(self, data):
-        global isp, ish, isa, isul, isol, countli
-
-        if not data.isspace():
-            if isp == True or ish == True:
-                print(data, end="")
-            elif isp == False and ish == False and isa == True:
-                print(data, end="")
-            elif isul == True or isol == True:
-                print(countli, " ", data)
+    fp.close()
+    device.close()
+    retstr.close()
+    return text
 
 
 def show_menu():
@@ -81,28 +52,15 @@ def clear_screen():
 def user_input(url):
     clear_screen()
 
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    try:
-        op = urllib.request.urlopen(req, timeout=1)
-        source_code = op.read()
+    pdfkit.from_url(url, 'output.pdf')
 
-        parser = Parser()
-        parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
-    except urllib.error.URLError:
-        show_error()
+    print convert_pdf_to_txt('output.pdf')
 
 
 def default():
     url = "http://computemagazine.com/man-who-invented-world-wide-web-gives-new-definition/"
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    try:
-        op = urllib.request.urlopen(req, timeout=1)
-        source_code = op.read()
-
-        parser = Parser()
-        parser.feed(str(source_code.decode("utf-8")).replace('\n', ' '))
-    except urllib.error.URLError:
-        show_error()
+    
+    user_input(url)
 
 
 def from_file(location):
@@ -111,18 +69,10 @@ def from_file(location):
     if location[-5:] != '.html':
         print("Extension of the file should be .html   -_-")
     else:
-        file = open(location, 'r')
-        source_code = file.read()
-        parser = Parser()
-        parser.feed(source_code.replace('\n', ' '))
+        pdfkit.from_file(location, 'output.pdf')
+        
+        print convert_pdf_to_txt('output.pdf')
 
-
-isp = False
-ish = False
-isa = False
-isol = False
-isul = False
-countli = 0
 
 clear_screen()
 show_menu()
